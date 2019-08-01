@@ -1,0 +1,76 @@
+<%back if !admin_ip? || !admin?%>
+
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/admin_logo.png")), {controller: 'admin', action: 'index'}, style: "display: inline-block"%><br> 
+  <%=link_to "Back to Main Page",:controller => 'main', :action => 'index' %>
+</div>
+
+<div class="top_panel", style="position: relative">
+  <span style="font-size: 150%"><%="Welcome, #{current_admin.name}!"%></span>
+  <br>
+  <%="Server Time: #{Time.now.strftime("%Y-%m-%d %I:%M:%S %p ")}"%>
+  <div style="position: absolute; top: 20px; right: 16px">
+    <%=button_to "Log Out", url_for(:controller => 'admin', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 150px">
+    <%=button_to "View Logs", url_for(:controller => 'admin', :action => 'view_logs'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 284px">
+    <%=button_to "Manage Users", url_for(:controller => 'admin', :action => 'manage_users'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 418px">
+    <%=button_to "Manage Reloads", url_for(:controller => 'admin', :action => 'manage_reloads'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+  </div>       
+  <div style="position: absolute; top: 20px; right: 552px">
+    <%=button_to "Manage P. Codes", url_for(:controller => 'admin', :action => 'manage_prepaid_codes'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+  </div>    
+  <div style="position: absolute; top: 20px; right: 686px">
+    <%=button_to "Manage P. Types", url_for(:controller => 'admin', :action => 'manage_prepaid_types'), :class => "main_button", :style => "background-color: rgba(74, 128, 96, 1.0);"%>
+  </div>   
+</div>
+
+<div class="main_panel">
+  <h2>System Stats</h2>
+  <hr style="border: 1px solid #888" />
+  <table>
+    <tr>
+      <td align="right"><%="Users: "%></td>
+      <td align="left">&emsp;<%="#{User.count}"%></td>
+    </tr>    
+    <tr>
+      <td align="right"><%="Admins: "%></td>
+      <td align="left">&emsp;<%="#{Admin.count}"%></td>
+    </tr>     
+    <tr>
+      <td align="right"><%="Prepaid Types: "%></td>
+      <td align="left">&emsp;<%="#{PrepaidType.count}"%></td>
+    </tr>  
+    <tr>
+      <td align="right"><%="Prepaid Codes in Stock: "%></td>
+      <td align="left">&emsp;<%="#{get_stock_prepaid_code_count}"%></td>
+    </tr>    
+    <tr>
+      <td align="right"><%="Prepaid Codes: "%></td>
+      <td align="left">&emsp;<%="#{PrepaidCode.count}"%></td>
+    </tr>
+    <tr>
+      <td align="right"><%="Pending Reload Requests: "%></td>
+      <td align="left">&emsp;<%="#{ReloadRequest.where("approved = 'PENDING'").count}"%></td>
+    </tr>    
+    <tr>
+      <td align="right"><%="Reload Requests: "%></td>
+      <td align="left">&emsp;<%="#{ReloadRequest.count}"%></td>
+    </tr>        
+    <tr>
+      <td align="right"><%="Prepaid Purchases: "%></td>
+      <td align="left">&emsp;<%="#{PrepaidPurchase.count}"%></td>          
+    </tr>
+    <tr>
+      <td align="right"><%="Total Sales: "%></td>
+      <td align="left">&emsp;<%=sprintf("RM %.02f",PrepaidPurchase.all.sum("purchase_price"))%></td>       
+    </tr>
+  </table>     
+</div>
+<br>
+<br>
+

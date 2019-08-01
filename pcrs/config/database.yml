@@ -1,0 +1,23 @@
+
+default: &default
+  development:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  pool: 5
+  username: root
+  password: test
+  host: localhost
+  port: 3306
+
+development:
+  <<: *default
+  database: pcrs_development
+
+test:
+  <<: *default
+  database: pcrs_test
+
+production:
+  <<: *default
+  database: pcrs_production

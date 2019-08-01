@@ -1,0 +1,133 @@
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/logo.png")), {controller: 'main', action: 'index'}, style: "display: inline-block"%>
+  <br>
+  <%if admin_ip? && !logged_in?%>
+    <%=link_to "Admin Panel",:controller => 'admin', :action => 'login' %>
+  <%end%>  
+</div>
+
+<%if !logged_in? %>
+  <div class="top_panel", style="text-align: center;">
+    <div style="display: inline-block">
+      <%if params[:login_error] %>
+        <span style="color: red;"><b><%='*Invalid user name/password combination*'%></b></span>
+      <%end%>
+      <%= form_for(:login, url: url_for(:controller => 'main', :action => 'login')) do |form| %>
+        <%= form.label :name, 'User Name: '%>
+        <%= form.text_field :name%>
+        <%= form.label :password, 'Password: ', :style=>"margin-left: 4px"%>
+        <%= form.password_field :password%>
+        <%= form.submit 'Log In', :class => "login_button", :style => "background-color: rgba(0, 128, 0, 1.0);"%> &nbsp;
+        <%=link_to "New user? Register here!", url_for(:controller => 'register', :action => 'index')%>
+      <%end%>    
+    </div>
+  </div> 
+<%else%>
+  <div class="top_panel", style="position: relative">
+      <span style="font-size: 150%"><%="Welcome, #{current_user.name}!"%></span>
+      <br>
+      <%="Credits: #{get_current_user_credits}"%>
+      <div style="position: absolute; top: 20px; right: 16px">
+        <%=button_to "Log Out", url_for(:controller => 'main', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 150px">
+        <%=button_to "View Codes", url_for(:controller => 'main', :action => 'view_codes'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 284px">
+        <%=button_to "Reload Credits", url_for(:controller => 'main', :action => 'reload'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 418px">
+        <%=button_to "Edit Details", url_for(:controller => 'main', :action => 'edit_details'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+      </div>       
+      <div style="position: absolute; top: 20px; right: 552px">
+        <%=button_to "Buy Codes", url_for(:controller => 'main', :action => 'index'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+      </div>         
+  </div>
+<%end%>
+      
+<div class="main_panel">
+<h2>Catalogue</h2>
+<%if params[:purchase]%>
+  <%if params[:err1]%>
+    <span style="color: red"><b>*Please login to purchase codes*</b></span>
+  <%end%>
+  <%if params[:err2]%>
+    <span style="color: red"><b>*Sorry, this code is out of stock*</b></span>
+  <%end%>
+  <%if params[:err3]%>
+    <span style="color: red"><b>*Not enough credits*</b></span>
+  <%end%>  
+<%end%>
+<hr style="border: 1px solid #888" />
+<%params[:search] ||= {}%>
+<%= form_for(:search, url: url_for(:controller => 'main', :action => 'index')) do |form| %>
+  <%= form.label :name, 'Search Options: '%>
+  <%= form.select :type, options_for_select([["Starts with", 0],["Includes", 1]], :selected => params[:search][:type]) %>
+  <%= form.text_field :value, :value => params[:search][:value]%>
+  <%= form.submit 'Search'%>
+<%end%>
+<br>
+<%if @list[0].empty?%>
+  <%= 'Sorry, no results found!' %>
+<%else%>
+  <% endpoint = [(@page - 1) * @result_limit + @result_limit, @count].min %>
+    <div style="float: left">
+      <%= "Showing #{(@page - 1) * @result_limit + 1}~#{endpoint} out of #{@count} results." %>
+    </div>
+    <div style="float: right">
+      <%if @count > @result_limit%>
+        <div class="page_container">
+          <%if @page > 1%>
+            <div class="card_page"><%= link_to "<", {:controller => "main", :action => "index", :page => @page - 1 }%></div>
+          <%end%>
+          <%(@count.to_f / @result_limit).ceil.times do |i| %>
+            <%j = i + 1%>
+            <div class="card_page">
+              <%if j == @page%>
+                <b><%=j.to_s%></b>
+              <%else%>  
+                <%= link_to(j.to_s, {:controller => "main", :action => "index", :page => j })%>
+              <%end%>  
+            </div>
+          <%end%>
+          <%if @count > endpoint%>
+            <div class="card_page"><%= link_to ">", {:controller => "main", :action => "index", :page => @page + 1 }%></div>
+          <%end%>
+        </div>
+      <%end%>
+    </div>
+  <div style="clear: both"></div>
+  <%@list[0].each do |type|%>
+    <div class="card_panel">
+      <div class="card_img">
+        <%#image_exist = Rails.application.assets.find_asset()%>
+        <%image_exist = (Rails.application.assets || ::Sprockets::Railtie.build_environment(Rails.application)).find_asset('card_img/' + type.image_id.to_s).to_s %>
+        <%if image_exist%>
+          <%=image_tag(image_path("card_img/" + type.image_id.to_s + ".png"))%>
+        <%else%>
+          <%=image_tag(image_path("card_img/" + 0.to_s + ".png"))%>
+        <%end%>
+      </div>  
+      <div class="card_text">
+      <b><%=type.name%></b><br>
+      <%="RM " + sprintf("%.02f", type.price)%><br>
+      <%="(#{(type.price * 100).to_i.to_s} credits)"%><br>
+      <%stock = @list[1][type.id]; stock ||= 0%>
+      <%if stock > 0%>
+        <span style="color: green"><b>
+          <%= "In stock: #{stock}" %>
+        </b><span>
+        <br>
+        <%= link_to image_tag(image_path("main/purchase_button.png")), {:controller=>'main',:action=>'index',:page=>@page,:purchase=>type.id}, class: "purchase-button"%>
+      <%else%>
+        <span style="color: red"><b>OUT OF STOCK</b></span>
+      <%end%>
+      </div>
+    </div>
+  <%end%>
+<%end%>
+<br>
+<br>
+</div>
+<br>
+<br>

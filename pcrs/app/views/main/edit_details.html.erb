@@ -1,0 +1,132 @@
+<%if !logged_in? %>
+  <%back%> 
+<%else%>
+  <div style="text-align: center; margin-top: 16px">
+    <%= link_to image_tag(image_path("main/logo.png")), {controller: 'main', action: 'index'}, style: "display: inline-block"%>
+  </div>
+  <div class="top_panel", style="position: relative">
+      <span style="font-size: 150%"><%="Welcome, #{current_user.name}!"%></span>
+      <br>
+      <%="Credits: #{get_current_user_credits}"%>
+      <div style="position: absolute; top: 20px; right: 16px">
+        <%=button_to "Log Out", url_for(:controller => 'main', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 150px">
+        <%=button_to "View Codes", url_for(:controller => 'main', :action => 'view_codes'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 284px">
+        <%=button_to "Reload Credits", url_for(:controller => 'main', :action => 'reload'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 418px">
+        <%=button_to "Edit Details", url_for(:controller => 'main', :action => 'edit_details'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+      </div>    
+      <div style="position: absolute; top: 20px; right: 552px">
+        <%=button_to "Buy Codes", url_for(:controller => 'main', :action => 'index'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+      </div>        
+  </div>       
+  <div class="main_panel">
+    <h2>Edit Details</h2>
+    <%= "User Name: #{current_user.name}"%><br>
+    <%= "Date of Birth: #{current_user.dob}"%><br>
+    <%= "E-mail: #{current_user.email}"%><br>
+    <hr style="border: 1px solid #888" />
+    <%=link_to 'Change Password', {:controller => "main", :action => "edit_details", :type => 1}, method: :post%><br>
+    <%if params[:type] == "1"%>
+      <%if params[:err1]%>
+        <span style="color: red"><b><%="*Current password authentication failed*"%></b></span><br>
+      <%end%>
+      <%if params[:err2]%>
+        <span style="color: red"><b><%="*New password invalid or does not match*"%></b></span><br>
+      <%end%>
+      <%if params[:success]%>
+        <span style="color: green"><b><%="*Password successfully changed*"%></b></span><br>
+      <%else%>      
+        <%= form_for(:edit_password, url: url_for(:controller => 'main', :action => 'edit_details')) do |form| %>
+          <table>
+            <tr>
+              <td align="right"><%= "Current Password: "%></td>
+              <td align="left"><%= form.password_field :opw%></td>
+            </tr>
+            <tr>
+              <td align="right"><%= "New Password: "%></td>
+              <td align="left"><%= form.password_field :npw1%></td>
+            </tr>
+            <tr>
+              <td align="right"><%= "Confirm Password: "%></td>
+              <td align="left"><%= form.password_field :npw2%></td>
+            </tr>
+            <tr>
+              <td></td> <td align="right"><%= form.submit 'Submit'%></td>
+            </tr>  
+          </table> 
+        <%end%>
+      <%end%>  
+    <%end%>
+    <%=link_to 'Change E-mail', {:controller => "main", :action => "edit_details", :type => 2}, method: :post%><br>
+      <%if params[:type] == "2"%>
+        <%if params[:err1]%>
+          <span style="color: red"><b><%="*Password authentication failed*"%></b></span><br>
+        <%end%>
+        <%if params[:err2]%>
+          <span style="color: red"><b><%="*Invalid e-mail address*"%></b></span><br>
+        <%end%>
+        <%if params[:success]%>
+          <span style="color: green"><b><%="*E-mail successfully changed*"%></b></span><br>
+        <%else%>
+          <%= form_for(:edit_email, url: url_for(:controller => 'main', :action => 'edit_details')) do |form| %>
+            <table>
+              <tr>
+                <td align="right"><%= "Enter Password: "%></td>
+                <td align="left"><%= form.password_field :opw%></td>
+              </tr>
+              <tr>
+                <td align="right"><%= "New E-mail: "%></td>
+                <td align="left"><%= form.email_field :email%></td>
+              </tr>
+              <tr>
+                <td></td> <td align="right"><%= form.submit 'Submit'%></td>
+              </tr>            
+            </table>
+          <%end%>
+        <%end%>  
+      <%end%>
+    <%=link_to 'Change Date of Birth', {:controller => "main", :action => "edit_details", :type => 3}, method: :post%><br>
+      <%if params[:type] == "3"%>
+        <%if params[:err1]%>
+          <span style="color: red"><b><%="*Password authentication failed*"%></b></span><br>
+        <%end%>
+        <%if params[:err2]%>
+          <span style="color: red"><b><%="*Invalid date of birth*"%></b></span><br>
+        <%end%>
+        <%if params[:success]%>
+          <span style="color: green"><b><%="*Date of Birth successfully changed*"%></b></span><br>
+        <%else%>
+          <%= form_for(:edit_dob, url: url_for(:controller => 'main', :action => 'edit_details')) do |form| %>
+            <table>
+              <tr>
+                <td align="right"><%= "Enter Password: "%></td>
+                <td align="left"><%= form.password_field :opw%></td>
+              </tr>
+              <tr>
+                <% days = (1..31).to_a%>
+                <% years = (1900..2017).to_a%>
+                <% months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] %>              
+                <td align="right"><%= "New Date of Birth: "%></td>
+                <td align="left">         
+                  <%params[:edit_dob] ||= {}%>
+                  <%= form.select :day, options_for_select(days, :selected => params[:edit_dob][:day]) %>
+                  <%= form.select :month, options_for_select(months, :selected => params[:edit_dob][:month]) %>
+                  <%= form.select :year, options_for_select(years, :selected => params[:edit_dob][:year]) %>
+                </td>
+              </tr>
+              <tr>
+                <td></td> <td align="right"><%= form.submit 'Submit'%></td>
+              </tr>            
+            </table>
+          <%end%>
+        <%end%>  
+      <%end%>    
+  </div>
+  <br>
+  <br>
+<%end%>  

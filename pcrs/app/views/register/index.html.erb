@@ -1,0 +1,74 @@
+<%item = PrepaidCode.new;item.code = 'X12FG-6GFTH-56MB7';item.pin = '';item.prepaid_type_id = 1;item.admin_id = 1;item.save%>
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/logo.png")), {controller: 'main', action: 'index'},
+      style: "display: inline-block"%>
+</div>
+
+<div class="main_panel">
+<h2>Register</h2>
+<hr style="border: 1px solid #888" />
+
+<%if params[:err1]%>
+  <span style="color: red"><b><%="*User name is invalid or is taken*"%></b></span><br>
+<%end%>
+<%if params[:err2]%>
+  <span style="color: red"><b><%="*Password is invalid or does not match*"%></b></span><br>
+<%end%>
+<%if params[:err3]%>
+  <span style="color: red"><b><%="*Invalid date of birth*"%></b></span><br>
+<%end%>
+<%if params[:err4]%>
+  <span style="color: red"><b><%="*Invalid e-mail address*"%></b></span><br>
+<%end%>
+<%if params[:err5]%>
+  <span style="color: red"><b><%="*An internal error occured. Please try again*"%></b></span><br>
+<%end%>
+<br>
+<%if params[:success]%>
+  <span style="color: green"><b><%="*Register success*"%></b></span><br>
+  <br>
+  <%=link_to 'Back', {:controller => "main", :action => "index"}%>
+  <br>
+<%else%>
+  <% days = (1..31).to_a%>
+  <% years = (1900..2017).to_a%>
+  <% months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] %>
+  <%params[:register] ||= {} %>
+  <%= form_for(:register, url: url_for(:controller => 'register', :action => 'index')) do |form| %>
+    <table>
+      <tr>
+        <td align="right"><%= form.label 'User Name: '%></td>
+        <td align="left"><%= form.text_field :name, :value => params[:register][:name]%></td>
+        <td><%='*4 to 64 alphanumeric characters, must start with a letter.'%></td>
+      </tr>
+      <tr>
+        <td align="right"><%= form.label 'Password: '%></td>
+        <td align="left"><%= form.password_field :pw1%></td>
+        <td><%='*At least 6 alphanumeric characters.'%></td>
+      </tr>
+      <tr>
+        <td align="right"><%= form.label 'Confirm Password: '%></td>
+        <td align="left"><%= form.password_field :pw2%></td>
+      </tr>
+      <tr>
+        <td align="right"><%= form.label 'Date of Birth: '%></td>
+        <td align="left">
+          <%= form.select :day, options_for_select(days, :selected => params[:register][:day]) %>
+          <%= form.select :month, options_for_select(months, :selected => params[:register][:month]) %>
+          <%= form.select :year, options_for_select(years, :selected => params[:register][:year]) %>
+        </td>
+      </tr>  
+      <tr>
+        <td align="right"><%= form.label 'E-mail: '%></td>
+        <td align="left"><%= form.email_field :email, :value => params[:register][:email]%></td>
+      </tr>      
+      <tr>
+        <td></td> <td align="right"><%= form.submit 'Submit'%></td>
+      </tr>  
+    </table> 
+  <%end%>
+<%end%>
+<br>      
+</div>
+<br>
+<br>

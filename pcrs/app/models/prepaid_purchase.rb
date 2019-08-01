@@ -1,0 +1,2 @@
+class PrepaidPurchase < ApplicationRecord
+end

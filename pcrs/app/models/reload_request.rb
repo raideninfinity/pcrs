@@ -1,0 +1,2 @@
+class ReloadRequest < ApplicationRecord
+end

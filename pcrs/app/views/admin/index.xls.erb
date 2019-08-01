@@ -1,0 +1,111 @@
+<%back if !admin_ip? || !admin?%>
+<%names ||= {}%>
+<%types ||= {}%>
+<%@xls = get_log_xls_data%> 
+<%@log_type = params[:log_type].to_i%>
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <ss:Styles>
+    <ss:Style ss:ID="1">
+      <ss:Font ss:Bold="1"/>
+    </ss:Style>
+    <ss:Style ss:ID="s22">
+      <DateFormat ss:Format="yyyy-mm-dd hh:mm:ss am/pm"/>
+    </ss:Style>
+  </ss:Styles>
+    <%if @log_type == 1%>
+    <Worksheet ss:Name="Sheet1">
+      <Table>
+        <Row ss:StyleID="1">
+            <Cell><Data ss:Type="String">ID</Data></Cell>
+            <Cell><Data ss:Type="String">Date</Data></Cell>
+            <Cell><Data ss:Type="String">User ID</Data></Cell>
+            <Cell><Data ss:Type="String">User Name</Data></Cell>
+            <Cell><Data ss:Type="String">Type ID</Data></Cell>
+            <Cell><Data ss:Type="String">Type Name</Data></Cell>
+            <Cell><Data ss:Type="String">Code</Data></Cell> 
+            <Cell><Data ss:Type="String">PIN</Data></Cell>
+            <Cell><Data ss:Type="String">Price</Data></Cell>  
+            <Cell><Data ss:Type="String">Credits</Data></Cell>             
+        </Row>
+      <% @xls.each do |item| %>
+        <Row>
+          <Cell><Data ss:Type="Number"><%= item.id %></Data></Cell>
+          <Cell ss:StyleID="2"><Data ss:Type="Date"><%= item.created_at %></Data></Cell>
+          <Cell><Data ss:Type="Number"><%= item.user_id %></Data></Cell>
+          <%name = names[item.user_id]%>
+          <%name = User.find(item.user_id).name if !name %>
+          <Cell><Data ss:Type="String"><%= name %></Data></Cell>
+          <%code = PrepaidCode.find(item.prepaid_code_id) %>
+          <%type = types[code.prepaid_type_id] %>
+          <%type = PrepaidType.find(code.prepaid_type_id) if !type %>
+          <Cell><Data ss:Type="Number"><%= type.id %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= type.name %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= code.code %></Data></Cell> 
+          <Cell><Data ss:Type="String"><%= (!code.pin || code.pin.empty?) ? "-" : code.pin %></Data></Cell>
+          <Cell><Data ss:Type="Number"><%= item.purchase_price %></Data></Cell>
+          <Cell><Data ss:Type="Number"><%= (item.purchase_price * 100).to_i %></Data></Cell>
+        </Row>
+      <% end %>
+      </Table>
+    </Worksheet> 
+  <%elsif @log_type == 2%>
+    <Worksheet ss:Name="Sheet1">
+      <Table>
+        <Row ss:StyleID="1">
+            <Cell><Data ss:Type="String">ID</Data></Cell>
+            <Cell><Data ss:Type="String">Date</Data></Cell>
+            <Cell><Data ss:Type="String">User IP</Data></Cell>
+            <Cell><Data ss:Type="String">User ID</Data></Cell>
+            <Cell><Data ss:Type="String">User Name</Data></Cell>
+            <Cell><Data ss:Type="String">Action Name</Data></Cell>
+            <Cell><Data ss:Type="String">Action Details</Data></Cell>     
+        </Row>
+      <% @xls.each do |item| %>
+        <Row>
+          <Cell><Data ss:Type="Number"><%= item.id %></Data></Cell>
+          <Cell ss:StyleID="2"><Data ss:Type="Date"><%= item.created_at %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= item.ip %></Data></Cell>
+          <Cell><Data ss:Type="Number"><%= item.user_id %></Data></Cell>
+          <%name = names[item.user_id]%>
+          <%name = User.find(item.user_id).name if !name %>
+          <Cell><Data ss:Type="String"><%= name %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= item.action_name %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= item.action_details %></Data></Cell>
+        </Row>
+      <% end %>
+      </Table>
+    </Worksheet> 
+  <%elsif @log_type == 3%>
+    <Worksheet ss:Name="Sheet1">
+      <Table>
+        <Row ss:StyleID="1">
+            <Cell><Data ss:Type="String">ID</Data></Cell>
+            <Cell><Data ss:Type="String">Date</Data></Cell>
+            <Cell><Data ss:Type="String">Admin IP</Data></Cell>
+            <Cell><Data ss:Type="String">Admin ID</Data></Cell>
+            <Cell><Data ss:Type="String">Admin Name</Data></Cell>
+            <Cell><Data ss:Type="String">Action Name</Data></Cell>
+            <Cell><Data ss:Type="String">Action Details</Data></Cell>     
+        </Row>
+      <% @xls.each do |item| %>
+        <Row>
+          <Cell><Data ss:Type="Number"><%= item.id %></Data></Cell>
+          <Cell ss:StyleID="2"><Data ss:Type="Date"><%= item.created_at %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= item.ip %></Data></Cell>
+          <Cell><Data ss:Type="Number"><%= item.admin_id %></Data></Cell>
+          <%name = names[item.admin_id]%>
+          <%name = Admin.find(item.admin_id).name if !name %>
+          <Cell><Data ss:Type="String"><%= name %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= item.action_name %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= item.action_details %></Data></Cell>
+        </Row>
+      <% end %>
+      </Table>
+    </Worksheet>
+  <%end%> 
+</Workbook>

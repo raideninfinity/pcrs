@@ -1,0 +1,226 @@
+/* line 5, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+html, body {
+  font-family: Verdana,sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* line 5, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+html {
+  overflow-x: hidden;
+}
+
+/* line 6, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h1 {
+  font-size: 36px;
+}
+
+/* line 7, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h2 {
+  font-size: 30px;
+}
+
+/* line 8, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h3 {
+  font-size: 24px;
+}
+
+/* line 9, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h4 {
+  font-size: 20px;
+}
+
+/* line 10, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h5 {
+  font-size: 18px;
+}
+
+/* line 11, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h6 {
+  font-size: 16px;
+}
+
+/* line 12, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Segoe UI",Arial,sans-serif;
+  font-weight: 400;
+  margin: 10px 0;
+}
+
+/* line 14, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+body {
+  background-image: url(/assets/main/admin_bg-1cd343442c2a4580878f9fbce1bc1c25049f3d0eeeb295b36caa2b563787aa0c.png);
+}
+
+/* line 19, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+html, body {
+  overflow: initial !important;
+  min-width: 1280px;
+}
+
+/* line 25, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.top_panel {
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.75);
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 16px;
+  padding-left: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* line 37, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.login_button {
+  border-radius: 12px;
+  color: white;
+  width: 120px;
+  height: 48px;
+}
+
+/* line 45, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.main_button {
+  border-radius: 12px;
+  color: white;
+  width: 128px;
+  height: 48px;
+  margin-left: 8px;
+}
+
+/* line 54, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.confirm_button {
+  border-radius: 12px;
+  color: white;
+  width: 160px;
+  height: 48px;
+}
+
+/* line 62, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.main_panel {
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.75);
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* line 75, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.login_panel {
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.75);
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* line 88, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.card_panel {
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.75);
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 16px;
+  padding-left: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  width: 29%;
+  display: inline-block;
+  position: relative;
+}
+
+/* line 103, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.card_page {
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.75);
+  margin-top: 16px;
+  margin-right: 2px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  display: inline-block;
+}
+
+/* line 116, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.page_container {
+  margin-right: 38px;
+  text-align: right;
+  margin-bottom: 8px;
+}
+
+/* line 123, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.card_img {
+  position: absolute;
+}
+
+/* line 128, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.card_text {
+  height: 206px;
+  margin-left: 146px;
+  margin-right: 16px;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+/* line 137, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.purchase-button {
+  position: absolute;
+  top: 174px;
+  left: 162px;
+}
+
+/* line 144, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table {
+  border: 1px solid #1C6EA4;
+  background-color: #EEEEEE;
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+/* line 153, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table td, .vcode_table th {
+  border: 1px solid #AAAAAA;
+  padding: 3px 2px;
+}
+
+/* line 159, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table tr:nth-child(even) {
+  background: #D0E4F5;
+}
+
+/* line 163, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table thead {
+  background: #1C6EA4;
+  border-bottom: 2px solid #444444;
+}
+
+/* line 168, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #FFFFFF;
+  border-left: 2px solid #D0E4F5;
+}
+
+/* line 175, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table thead th:first-child {
+  border-left: none;
+}
+
+/* line 180, C:/Sites/pcrs/app/assets/stylesheets/admin.scss */
+.vcode_table tfoot {
+  font-size: 14px;
+  font-weight: bold;
+  color: #FFFFFF;
+  background: #D0E4F5;
+  border-top: 2px solid #444444;
+}

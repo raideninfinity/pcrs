@@ -1,0 +1,70 @@
+<%purchase_id = params[:id].to_i%>
+<%if !check_purchase_conditions(purchase_id) && !params[:purchase_result] %>
+  <%back%> 
+<%else%>
+  <div style="text-align: center; margin-top: 16px">
+    <%= link_to image_tag(image_path("main/logo.png")), {controller: 'main', action: 'index'}, style: "display: inline-block"%>
+  </div>
+  <div class="top_panel", style="position: relative">
+      <span style="font-size: 150%"><%="Welcome, #{current_user.name}!"%></span>
+      <br>
+      <%="Credits: #{get_current_user_credits}"%>
+      <div style="position: absolute; top: 20px; right: 16px">
+        <%=button_to "Log Out", url_for(:controller => 'main', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 150px">
+        <%=button_to "View Codes", url_for(:controller => 'main', :action => 'view_codes'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 284px">
+        <%=button_to "Reload Credits", url_for(:controller => 'main', :action => 'reload'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 418px">
+        <%=button_to "Edit Details", url_for(:controller => 'main', :action => 'edit_details'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 552px">
+        <%=button_to "Buy Codes", url_for(:controller => 'main', :action => 'index'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+      </div>        
+  </div>       
+  <div class="main_panel">
+    <h2>Purchase Code</h2>
+    <hr style="border: 1px solid #888" />
+    <%if params[:purchase_result]%>
+      <%if params[:success]%>
+        <span style="color:green"><b>Purchase success!</b></span><br><br>
+        <%="Code: #{params[:code]}"%><br>
+        <%pin = params[:pin]%>
+        <%="PIN: #{(!pin || pin.empty?) ? "-" : pin}"%><br>
+        <br>
+        <%="You can view the purchased code in the \"View Codes\" page."%><br>
+      <%elsif params[:err1]%>
+        <span style="color: red"><b><%="Purchase failed! Please try again!"%></b></span><br>
+      <%end%>
+    <%end%>
+    <%if !params[:purchase_result]%>
+      <%type = PrepaidType.find(purchase_id)%>
+      <div class="card_panel">
+        <div class="card_img">
+          <%#image_exist = Rails.application.assets.find_asset()%>
+          <%image_exist = (Rails.application.assets || ::Sprockets::Railtie.build_environment(Rails.application)).find_asset('card_img/' + type.image_id.to_s).to_s %>
+          <%if image_exist%>
+            <%=image_tag(image_path("card_img/" + type.image_id.to_s + ".png"))%>
+          <%else%>
+            <%=image_tag(image_path("card_img/" + 0.to_s + ".png"))%>
+          <%end%>
+        </div>  
+        <div class="card_text">
+          <b><%=type.name%></b><br>
+          <%="RM " + sprintf("%.02f", type.price)%><br>
+          <%="(#{(type.price * 100).to_i.to_s} credits)"%><br>
+          <%= form_for(:purchase, url: url_for(:controller => 'main', :action => 'purchase')) do |form| %>
+            <%= form.hidden_field :purchase_id, :value => purchase_id%>
+            <%= form.submit 'Confirm Purchase', :class => "confirm_button", :style => "background-color: rgba(0, 128, 0, 1.0);"%>
+          <%end%>
+        </div>
+      </div>    
+    <%end%>
+    <br>
+  </div>
+  <br>
+  <br>
+<%end%>  

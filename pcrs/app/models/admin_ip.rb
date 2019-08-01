@@ -1,0 +1,2 @@
+class AdminIp < ApplicationRecord
+end

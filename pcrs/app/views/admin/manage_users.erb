@@ -1,0 +1,171 @@
+<%back if !admin_ip? || !admin?%>
+
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/admin_logo.png")), {controller: 'admin', action: 'index'}, style: "display: inline-block"%>
+</div>
+
+<div class="top_panel", style="position: relative">
+  <span style="font-size: 150%"><%="Welcome, #{current_admin.name}!"%></span>
+  <br>
+  <%="Server Time: #{Time.now.strftime("%Y-%m-%d %I:%M:%S %p ")}"%>
+  <div style="position: absolute; top: 20px; right: 16px">
+    <%=button_to "Log Out", url_for(:controller => 'admin', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 150px">
+    <%=button_to "View Logs", url_for(:controller => 'admin', :action => 'view_logs'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 284px">
+    <%=button_to "Manage Users", url_for(:controller => 'admin', :action => 'manage_users'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 418px">
+    <%=button_to "Manage Reloads", url_for(:controller => 'admin', :action => 'manage_reloads'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+  </div>       
+  <div style="position: absolute; top: 20px; right: 552px">
+    <%=button_to "Manage P. Codes", url_for(:controller => 'admin', :action => 'manage_prepaid_codes'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+  </div>    
+  <div style="position: absolute; top: 20px; right: 686px">
+    <%=button_to "Manage P. Types", url_for(:controller => 'admin', :action => 'manage_prepaid_types'), :class => "main_button", :style => "background-color: rgba(74, 128, 96, 1.0);"%>
+  </div>   
+</div>
+
+<div class="main_panel">
+  <h2>Manage Users</h2>
+  <%@type = "manage_users"%>
+  <%="Number of users: #{@count}" %><br>
+  <br>
+  <%if params[:add] || params[:edit] || params[:delete] || params[:result]%>
+    <hr style="border: 1px solid #888" />
+  <%end%>
+  
+  <%if params[:result]%>
+    <%result = params[:result].to_i%>
+    <%result_text = {100 => "*Operation Success*"}%>
+    <%result_text.merge!({101 => "*Invalid parameters*"})%>
+    <%result_text.merge!({102 => "*Internal error occured*"})%>
+    <%if result % 100 == 0%>
+      <span style="color: green"><b><%=result_text[result]%></b></span><br>
+    <%else%>
+      <span style="color: red"><b><%=result_text[result]%></b></span><br>
+    <%end%>  
+  <%end%>
+  
+  <%if params[:delete]%>
+    <b><%="Are you sure you want to delete User \##{params[:delete]}?"%></b>
+    <%= form_for(:f_delete, url: url_for(:controller => 'admin', :action => @type, :page => @page)) do |form| %>
+      <%= form.hidden_field :id, :value => params[:delete]%>
+      <%= form.submit 'Confirm'%>
+    <%end%>
+  <%end%>
+  
+  <%if params[:edit]%>
+    <b><%="Editing details of User ##{params[:edit]}."%></b>
+     <%= form_for(:f_edit, url: url_for(:controller => 'admin', :action => @type, :page => @page)) do |form| %>
+      <table>
+        <tr>
+          <td align="right"><%= "Name: "%></td>
+          <td align="left"><%= form.text_field(:name, :size => 50, :value => @item.name)%></td>
+        </tr>
+        <tr>
+          <td align="right"><%= "Password: "%></td>
+          <td align="left"><%= form.password_field(:pw1, :size => 50)%></td>
+        </tr>
+        <tr>
+          <td align="right"><%= "Confirm Password: "%></td>
+          <td align="left"><%= form.password_field(:pw2, :size => 50)%></td>
+        </tr>        
+        <tr>
+          <% days = (1..31).to_a%>
+          <% years = (1900..2017).to_a%>
+          <% months = [['Jan',1],['Feb',2],['Mar',3],['Apr',4],['May',5],['Jun',6],
+                       ['Jul',7],['Aug',8],['Sep',9],['Oct',10],['Nov',11],['Dec',12]] %>
+          <%date = @item.dob ? @item.dob : Time.now.to_date%>
+          <%params[:date] = {}%>
+          <%params[:date][:day] = date.mday%>
+          <%params[:date][:month] = date.month%>
+          <%params[:date][:year] = date.year%>
+          <td align="right"><%= "Date of Birth: "%></td>
+          <td align="left">
+            <%= form.select :day, options_for_select(days, :selected => params[:date][:day]) %>
+            <%= form.select :month, options_for_select(months, :selected => params[:date][:month]) %>
+            <%= form.select :year, options_for_select(years, :selected => params[:date][:year]) %>          
+          </td>
+        </tr>
+        <tr>
+          <td align="right"><%= "E-mail: "%></td>
+          <td align="left"><%= form.email_field(:email, :value => @item.email, :size => 50)%></td>
+        </tr> 
+        <tr>
+          <td align="right"><%= "Credits: "%></td>
+          <td align="left"><%= form.number_field(:credits, :value => @item.credits, :size => 50)%>&nbsp;<%="*RM 1.00 = 100 credits*"%></td>
+        </tr>        
+        <tr>
+          <td><%= form.hidden_field :id, :value => params[:edit]%></td>
+          <td><%= form.submit 'Confirm'%></td>
+        </tr>  
+      </table>     
+    <%end%>   
+  <%end%>
+  
+  <hr style="border: 1px solid #888" />
+    <%if @list[0].empty?%>
+      <%= 'No results found.' %>
+    <%else%>
+      <% endpoint = [(@page - 1) * @result_limit + @result_limit, @count].min %>
+        <div style="float: left"> 
+          <br>
+          <%= "Showing #{(@page - 1) * @result_limit + 1}~#{endpoint} out of #{@count} results." %>
+        </div>
+        <div style="float: right">
+          <%if @count > @result_limit%>
+            <div class="page_container">
+              <%if @page > 1%>
+                <div class="card_page"><%= link_to "<", {:controller => "admin", :action => @type, :page => @page - 1}%></div>
+              <%end%>
+              <%(@count.to_f / @result_limit).ceil.times do |i| %>
+                <%j = i + 1%>
+                <div class="card_page">
+                  <%if j == @page%>
+                    <b><%=j.to_s%></b>
+                  <%else%>  
+                    <%= link_to(j.to_s, {:controller => "admin", :action => @type, :page => j })%>
+                  <%end%>  
+                </div>
+              <%end%>
+              <%if @count > endpoint%>
+                <div class="card_page"><%= link_to ">", {:controller => "admin", :action => @type, :page => @page + 1}%></div>
+              <%end%>
+            </div>
+          <%end%>
+        </div>
+      <div style="clear: both"></div>
+      <table class="vcode_table">
+        <tr>
+          <td style="width: 60px"><b>ID</b></td>
+          <td><b>Name</b></td>
+          <td style="width: 260px"><b>Date of Birth</b></td>
+          <td style="width: 260px"><b>E-mail</b></td>
+          <td style="width: 260px"><b>Credits</b></td>
+          <td style="width: 160px"><b>Operations</b></td>
+        </tr>
+        <%@list[0].each_with_index do |item, index|%>
+          <tr>
+            <td><%=item.id%></td>
+            <td><%=item.name%></td>
+            <td><%=item.dob%></td>
+            <td><%=item.email%></td>
+            <td><%="#{item.credits} (RM #{sprintf('%.2f',item.credits / 100.0)})"%></td>
+            <td>
+              <%= link_to "Modify", {:controller => "admin", :action => @type, :page => @page, :edit => item.id}%>
+              <%if (PrepaidPurchase.where("user_id = #{item.id}").count) == 0 && (ReloadRequest.where("user_id = #{item.id}").count) == 0%>
+                <%= link_to "Delete", {:controller => "admin", :action => @type, :page => @page, :delete => item.id}%>
+              <%end%>
+            </td>
+          </tr>
+        <%end%>
+      </table>
+    <%end%>
+    <br>
+  </div>
+  <br>
+  <br>  
+</div>  

@@ -1,0 +1,184 @@
+<%back if !admin_ip? || !admin?%>
+
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/admin_logo.png")), {controller: 'admin', action: 'index'}, style: "display: inline-block"%>
+</div>
+
+<div class="top_panel", style="position: relative">
+  <span style="font-size: 150%"><%="Welcome, #{current_admin.name}!"%></span>
+  <br>
+  <%="Server Time: #{Time.now.strftime("%Y-%m-%d %I:%M:%S %p ")}"%>
+  <div style="position: absolute; top: 20px; right: 16px">
+    <%=button_to "Log Out", url_for(:controller => 'admin', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 150px">
+    <%=button_to "View Logs", url_for(:controller => 'admin', :action => 'view_logs'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 284px">
+    <%=button_to "Manage Users", url_for(:controller => 'admin', :action => 'manage_users'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 418px">
+    <%=button_to "Manage Reloads", url_for(:controller => 'admin', :action => 'manage_reloads'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+  </div>       
+  <div style="position: absolute; top: 20px; right: 552px">
+    <%=button_to "Manage P. Codes", url_for(:controller => 'admin', :action => 'manage_prepaid_codes'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+  </div>    
+  <div style="position: absolute; top: 20px; right: 686px">
+    <%=button_to "Manage P. Types", url_for(:controller => 'admin', :action => 'manage_prepaid_types'), :class => "main_button", :style => "background-color: rgba(74, 128, 96, 1.0);"%>
+  </div>   
+</div>
+
+<div class="main_panel">
+  <h2>Manage Prepaid Codes</h2>
+  <%@type = "manage_prepaid_codes"%>
+  <%="Number of prepaid codes: #{@ccount}" %><br>
+  <%="Number of prepaid codes in stock: #{@scount}" %><br>
+  <%= link_to 'Add Prepaid Code', {:controller=>'admin', :action=>@type, :add=>"true", :page => @page, :show_all => @show_all}%>
+  <br>
+  <%if params[:add] || params[:edit] || params[:delete] || params[:result]%>
+    <hr style="border: 1px solid #888" />
+  <%end%>
+  
+  <%if params[:result]%>
+    <%result = params[:result].to_i%>
+    <%result_text = {100 => "*Operation Success*"}%>
+    <%result_text.merge!({101 => "*Invalid parameters*"})%>
+    <%result_text.merge!({102 => "*Internal error occured*"})%>
+    <%if result % 100 == 0%>
+      <span style="color: green"><b><%=result_text[result]%></b></span><br>
+    <%else%>
+      <span style="color: red"><b><%=result_text[result]%></b></span><br>
+    <%end%>  
+  <%end%>
+  
+  <%if params[:delete]%>
+    <b><%="Are you sure you want to delete Item \##{params[:delete]}?"%></b>
+    <%= form_for(:f_delete, url: url_for(:controller => 'admin', :action => @type, :page => @page, :show_all => @show_all)) do |form| %>
+      <%= form.hidden_field :id, :value => params[:delete]%>
+      <%= form.submit 'Confirm'%>
+    <%end%>
+  <%end%>
+  
+  <%if params[:add]%>
+    <b><%="Adding new item."%></b>
+     <%= form_for(:f_add, url: url_for(:controller => 'admin', :action => @type, :page => @page, :show_all => @show_all)) do |form| %>
+      <table>
+        <tr>
+          <td align="right"><%= "Code: "%></td>
+          <td align="left"><%= form.text_field(:code, :size => 50)%></td>
+        </tr>
+        <tr>
+          <td align="right"><%= "PIN: "%></td>
+          <td align="left"><%= form.text_field(:pin, :size => 50)%></td>
+        </tr>    
+        <tr>
+          <td align="right"><%= "Type: "%></td>
+          <td align="left"><%= form.select(:type, options_for_select(@prepaid_type_arr), {}, {:style => "width:327px"})%></td>
+        </tr>         
+        <tr>
+          <td></td>
+          <td><%= form.submit 'Confirm'%></td>
+        </tr>  
+      </table>     
+    <%end%>   
+  <%end%>
+  
+  <%if params[:edit]%>
+    <b><%="Editing Item ##{params[:edit]}."%></b>
+     <%= form_for(:f_edit, url: url_for(:controller => 'admin', :action => @type, :page => @page, :show_all => @show_all)) do |form| %>
+      <table>
+        <tr>
+          <td align="right"><%= "Code: "%></td>
+          <td align="left"><%= form.text_field(:code, :size => 50, :value => @item.code)%></td>
+        </tr>
+        <tr>
+          <td align="right"><%= "PIN: "%></td>
+          <td align="left"><%= form.text_field(:pin, :size => 50, :value => @item.pin)%></td>
+        </tr>    
+        <tr>
+          <td align="right"><%= "Type: "%></td>
+          <td align="left"><%= form.select(:type, options_for_select(@prepaid_type_arr, selected = @item.prepaid_type_id), {}, {:style => "width:327px"})%></td>
+        </tr>        
+        <tr>
+          <td><%= form.hidden_field :id, :value => params[:edit]%></td>
+          <td><%= form.submit 'Confirm'%></td>
+        </tr>  
+      </table>     
+    <%end%>   
+  <%end%>
+  
+  <hr style="border: 1px solid #888" />
+    <%if @list[0].empty?%>
+      <%if !@show_all %>
+        <%= link_to "Show All Codes", {:controller => "admin", :action => @type, :page => @page, :show_all => true}%>
+      <%else%>  
+        <%= link_to "Show Codes in Stock Only", {:controller => "admin", :action => @type, :page => @page, :show_all => false}%>
+      <%end%>    
+      <br>
+      <br>
+      <%= 'No results found.' %>
+    <%else%>
+      <% endpoint = [(@page - 1) * @result_limit + @result_limit, @count].min %>
+        <div style="float: left">
+          <%if !@show_all %>
+            <%= link_to "Show All Codes", {:controller => "admin", :action => @type, :page => @page, :show_all => true}%>
+          <%else%>  
+            <%= link_to "Show Codes in Stock Only", {:controller => "admin", :action => @type, :page => @page, :show_all => false}%>
+          <%end%>  
+          <br>
+          <%= "Showing #{(@page - 1) * @result_limit + 1}~#{endpoint} out of #{@count} results." %>
+        </div>
+        <div style="float: right">
+          <%if @count > @result_limit%>
+            <div class="page_container">
+              <%if @page > 1%>
+                <div class="card_page"><%= link_to "<", {:controller => "admin", :action => @type, :page => @page - 1, :show_all => @show_all}%></div>
+              <%end%>
+              <%(@count.to_f / @result_limit).ceil.times do |i| %>
+                <%j = i + 1%>
+                <div class="card_page">
+                  <%if j == @page%>
+                    <b><%=j.to_s%></b>
+                  <%else%>  
+                    <%= link_to(j.to_s, {:controller => "admin", :action => @type, :page => j })%>
+                  <%end%>  
+                </div>
+              <%end%>
+              <%if @count > endpoint%>
+                <div class="card_page"><%= link_to ">", {:controller => "admin", :action => @type, :page => @page + 1, :show_all => @show_all }%></div>
+              <%end%>
+            </div>
+          <%end%>
+        </div>
+      <div style="clear: both"></div>
+      <table class="vcode_table">
+        <tr>
+          <td style="width: 60px"><b>ID</b></td>
+          <td style="width: 260px"><b>Code</b></td>
+          <td style="width: 260px"><b>PIN</b></td>
+          <td><b>Type</b></td>
+          <td style="width: 80px"><b>In Stock</b></td>
+          <td style="width: 160px"><b>Operations</b></td>
+        </tr>
+        <%@list[0].each_with_index do |item, index|%>
+          <tr>
+            <td><%=item.id%></td>
+            <td><%=item.code%></td>
+            <td><%="#{(!item.pin || item.pin.empty?) ? "-" : item.pin}"%></td>
+            <td><%=format_prepaid_type_string(item.prepaid_type_id)%></td>
+            <td><%=cstock = @list[2][item.id] ? "Yes" : "No"%></td>
+            <td>
+              <%= link_to "Modify", {:controller => "admin", :action => @type, :page => @page, :edit => item.id, :show_all => @show_all }%>
+              <%if cstock == "Yes"%>
+                <%= link_to "Delete", {:controller => "admin", :action => @type, :page => @page, :delete => item.id, :show_all => @show_all }%>
+              <%end%>
+            </td>
+          </tr>
+        <%end%>
+      </table>
+    <%end%>
+    <br>
+  </div>
+  <br>
+  <br>  
+</div>  

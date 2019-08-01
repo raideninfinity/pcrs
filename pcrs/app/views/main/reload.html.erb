@@ -1,0 +1,182 @@
+<%if !logged_in? %>
+  <%back%> 
+<%else%>
+  <div style="text-align: center; margin-top: 16px">
+    <%= link_to image_tag(image_path("main/logo.png")), {controller: 'main', action: 'index'}, style: "display: inline-block"%>
+  </div>
+  <div class="top_panel", style="position: relative">
+      <span style="font-size: 150%"><%="Welcome, #{current_user.name}!"%></span>
+      <br>
+      <%="Credits: #{get_current_user_credits}"%>
+      <div style="position: absolute; top: 20px; right: 16px">
+        <%=button_to "Log Out", url_for(:controller => 'main', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 150px">
+        <%=button_to "View Codes", url_for(:controller => 'main', :action => 'view_codes'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 284px">
+        <%=button_to "Reload Credits", url_for(:controller => 'main', :action => 'reload'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 418px">
+        <%=button_to "Edit Details", url_for(:controller => 'main', :action => 'edit_details'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+      </div>
+      <div style="position: absolute; top: 20px; right: 552px">
+        <%=button_to "Buy Codes", url_for(:controller => 'main', :action => 'index'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+      </div>        
+  </div>       
+  <div class="main_panel">
+    <h2>Reload Credits</h2>
+    <%="Number of pending requests: #{@p_count}" %><br>
+    <%= link_to 'Request Reload', {:controller=>'main', :action=>'reload', :page=>@page, :request=>"true"}%>
+    <br>
+    
+    <%if params[:success]%>
+      <br><span style="color: green"><b><%="*Request submitted*"%></b></span><br>
+    <%end%>
+    <%params[:success] = nil%>
+    
+    <%if params[:err1]%>
+      <br><span style="color: red"><b><%="*Transaction ID and Transaction Type cannot be empty!*"%></b></span><br>
+      <%params[:request] = true%>
+    <%end%>
+    <%params[:err1] = nil%>
+    
+    <%if params[:err2]%>
+      <br><span style="color: red"><b><%="*An internal error occured!*"%></b></span><br>
+      <%params[:request] = true%>
+    <%end%>
+    <%params[:err2] = nil%>
+    
+    <%if params[:request] %>
+      <br>
+      <%= form_for(:reload_request, url: url_for(:controller => 'main', :action => 'reload')) do |form| %>    
+        <table>
+          <tr>
+            <td align="right"><%= "Transaction ID: "%></td>
+            <td align="left"><%= form.text_field :tid%>&nbsp;<%="*Transaction ID of bank transfer statement*"%></td>
+          </tr>
+          <tr>
+            <td align="right"><%= "Transaction Type: "%></td>
+            <td align="left"><%= form.text_field :ttype%>&nbsp;<%="*Method of transfer/Name of bank*"%></td>
+          </tr>
+          <tr>
+            <td align="right"><%= "Comments: "%></td>
+            <td align="left"><%= form.text_area :comments ,:cols => 80, :rows => 6%>&nbsp;<%="*Additional information to help prove the transaction*"%></td>
+          </tr>   
+          <tr>
+            <td></td> <td align="left"><%= form.submit 'Submit'%></td>  
+          </tr>
+        </table>
+      <%end%>  
+    <%end%>
+    
+    <%if params[:view] && !params[:request] && auth_reload_owner(params[:view].to_i)%>
+      <%req = ReloadRequest.find(params[:view].to_i)%>
+      <br>
+      <b><%="Showing Request ##{params[:num]}"%></b><br>
+      <table>
+        <tr>
+          <td align="right"><%="Request Date: "%></td>
+          <td align="left">&emsp;<%=req.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Transaction ID: "%></td>
+          <td align="left">&emsp;<%=req.transaction_id.to_s%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Transaction Type: "%></td>
+          <td align="left">&emsp;<%=req.transaction_type%></td>
+        </tr>        
+        <tr>
+          <td align="right"><%="Comments: "%></td>
+          <td align="left">&emsp;<%=req.comments%></td>          
+        </tr>
+        <tr>
+          <td align="right"><%="Status: "%></td>
+          <td align="left">&emsp;<%=req.approved%></td>               
+        </tr>
+        <tr>
+          <td align="right"><%="Process Date: "%></td>
+          <td align="left">&emsp;<%=req.approved != "PENDING" ? req.approve_time.strftime("%Y-%m-%d %I:%M:%S %p ") : "-"%></td> 
+        </tr>
+        <tr>
+          <td align="right"><%="Admin Comments: "%></td>
+          <td align="left">&emsp;<%=req.approved != "PENDING" ? req.approve_comments : "-"%></td> 
+        </tr>
+        <tr>
+          <td align="right"><%="Amount: "%></td>
+          <td alight="left">&emsp;<%=req.approved == "APPROVED" ? sprintf("RM %.02f", req.approve_credits.to_f / 100) + " (#{(req.approve_credits).to_i} credits)" : "-"%>        
+        </tr>
+      </table>  
+      <br>
+    <%end%>
+    <hr style="border: 1px solid #888" />
+    <%if @list[0].empty?%>
+      <%= 'No requests found.' %>
+    <%else%>
+      <% endpoint = [(@page - 1) * @result_limit + @result_limit, @count].min %>
+        <div style="float: left">
+          <%= "Showing #{(@page - 1) * @result_limit + 1}~#{endpoint} out of #{@count} results." %>
+        </div>
+        <br>
+        <div style="float: right">
+          <%if @count > @result_limit%>
+            <div class="page_container">
+              <%if @page > 1%>
+                <div class="card_page"><%= link_to "<", {:controller => "main", :action => "reload", :page => @page - 1 }%></div>
+              <%end%>
+              <%(@count.to_f / @result_limit).ceil.times do |i| %>
+                <%j = i + 1%>
+                <div class="card_page">
+                  <%if j == @page%>
+                    <b><%=j.to_s%></b>
+                  <%else%>  
+                    <%= link_to(j.to_s, {:controller => "main", :action => "reload", :page => j })%>
+                  <%end%>  
+                </div>
+              <%end%>
+              <%if @count > endpoint%>
+                <div class="card_page"><%= link_to ">", {:controller => "main", :action => "reload", :page => @page + 1 }%></div>
+              <%end%>
+            </div>
+          <%end%>
+        </div>
+      <div style="clear: both"></div>
+      <table class="vcode_table">
+        <tr>
+          <td style="width: 60px"><b>No. </b></td>
+          <td style="width: 240px"><b>Request Date</b></td>
+          <td style="width: 240px"><b>Transaction ID</b></td>
+          <td style="width: 120px"><b>Status</b></td>
+          <td style="width: 240px"><b>Process Date</b></td>
+          <td style="width: 240px"><b>Amount</b></td>
+          <td></td>
+        </tr>
+        <%@list[0].each_with_index do |req, index|%>
+          <tr>
+            <%num = (@page - 1) * @result_limit + index + 1 %>
+            <td><%=num%>
+            <td><%=req.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+            <td><%=req.transaction_id%></td>
+            <td><%=req.approved%></td>
+            <%if req.approved == "PENDING"%>
+              <td>-</td>
+              <td>-</td>
+            <%else%>  
+              <td><%=req.approve_time.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+                <%if req.approved == "APPROVED"%>
+                    <td><%="RM " + sprintf("%.02f", req.approve_credits.to_f / 100) + " (#{(req.approve_credits).to_i  } credits)" %> </td>
+                <%else%>
+                    <td>-</td>
+                <%end%>
+            <%end%>
+            <td><%= link_to 'View', {:controller=>'main', :action=>'reload', :page=>@page, :view=>"#{req.id}", :num=>"#{num}"}%></td>
+          </tr>
+        <%end%>
+      </table>
+    <%end%>
+    <br>
+  </div>
+  <br>
+  <br>
+<%end%>     

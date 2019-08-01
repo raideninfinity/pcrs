@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Register</title>
+	<%= favicon_link_tag %>
+    <%= csrf_meta_tags %>
+
+    <%=stylesheet_link_tag('main', 'data-turbolinks-track': 'reload')%>
+    <%=javascript_include_tag('application', 'data-turbolinks-track': 'reload')%>
+  </head>
+
+  <body style="background-image: image-url(main_bg.png)">
+    <%= yield %>
+  </body>
+</html>

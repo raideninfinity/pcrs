@@ -1,0 +1,196 @@
+<%back if !admin_ip? || !admin?%>
+
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/admin_logo.png")), {controller: 'admin', action: 'index'}, style: "display: inline-block"%>
+</div>
+
+<div class="top_panel", style="position: relative">
+  <span style="font-size: 150%"><%="Welcome, #{current_admin.name}!"%></span>
+  <br>
+  <%="Server Time: #{Time.now.strftime("%Y-%m-%d %I:%M:%S %p ")}"%>
+  <div style="position: absolute; top: 20px; right: 16px">
+    <%=button_to "Log Out", url_for(:controller => 'admin', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 150px">
+    <%=button_to "View Logs", url_for(:controller => 'admin', :action => 'view_logs'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 284px">
+    <%=button_to "Manage Users", url_for(:controller => 'admin', :action => 'manage_users'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 418px">
+    <%=button_to "Manage Reloads", url_for(:controller => 'admin', :action => 'manage_reloads'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+  </div>       
+  <div style="position: absolute; top: 20px; right: 552px">
+    <%=button_to "Manage P. Codes", url_for(:controller => 'admin', :action => 'manage_prepaid_codes'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+  </div>    
+  <div style="position: absolute; top: 20px; right: 686px">
+    <%=button_to "Manage P. Types", url_for(:controller => 'admin', :action => 'manage_prepaid_types'), :class => "main_button", :style => "background-color: rgba(74, 128, 96, 1.0);"%>
+  </div>   
+</div>
+
+<div class="main_panel">
+  <h2>Manage Reloads</h2>
+  <%@type = "manage_reloads"%>
+  <%="Number of pending Requests: #{@ccount}" %><br>
+  <%="Total number of Requests: #{@scount}" %><br>
+  <br>
+  <%if params[:view] || params[:process] || params[:result]%>
+    <hr style="border: 1px solid #888" />
+  <%end%>
+  
+  <%if params[:result]%>
+    <%result = params[:result].to_i%>
+    <%result_text = {100 => "*Operation Success*"}%>
+    <%result_text.merge!({101 => "*Invalid parameters*"})%>
+    <%result_text.merge!({102 => "*Internal error occured*"})%>
+    <%if result % 100 == 0%>
+      <span style="color: green"><b><%=result_text[result]%></b></span><br>
+    <%else%>
+      <span style="color: red"><b><%=result_text[result]%></b></span><br>
+    <%end%>  
+  <%end%>
+  
+  <%if params[:view] || params[:process]%>
+      <%id = params[:view].to_i if params[:view]%>
+      <%id = params[:process].to_i if params[:process]%>
+      <%item = ReloadRequest.find(id)%>
+      <br>
+      <b><%="Showing Request ##{id}:"%></b><br>
+      <table>
+        <tr>
+          <td align="right"><%="User: "%></td>
+          <td align="left">&emsp;<%="#{item.user_id} - #{User.find(item.user_id).name}"%></td>
+        </tr>      
+        <tr>
+          <td align="right"><%="Request Date: "%></td>
+          <td align="left">&emsp;<%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Transaction ID: "%></td>
+          <td align="left">&emsp;<%=item.transaction_id.to_s%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Transaction Type: "%></td>
+          <td align="left">&emsp;<%=item.transaction_type%></td>
+        </tr>        
+        <tr>
+          <td align="right"><%="Comments: "%></td>
+          <td align="left">&emsp;<%=item.comments%></td>          
+        </tr>
+        <tr>
+          <td align="right"><%="Status: "%></td>
+          <td align="left">&emsp;<%=item.approved%></td>               
+        </tr>
+        <tr>
+          <td align="right"><%="Process Date: "%></td>
+          <td align="left">&emsp;<%=item.approved != "PENDING" ? item.approve_time.strftime("%Y-%m-%d %I:%M:%S %p ") : "-"%></td> 
+        </tr>
+        <tr>
+          <td align="right"><%="Process Admin: "%></td>
+          <td align="left">&emsp;<%=item.approved != "PENDING" ? "#{item.admin_id} - #{Admin.find(item.admin_id).name}" : "-"%></td> 
+        </tr>        
+        <tr>
+          <td align="right"><%="Admin Comments: "%></td>
+          <td align="left">&emsp;<%=item.approved != "PENDING" ? item.approve_comments : "-"%></td> 
+        </tr>
+        <tr>
+          <td align="right"><%="Amount: "%></td>
+          <td alight="left">&emsp;<%=item.approved == "APPROVED" ? sprintf("RM %.02f", item.approve_credits.to_f / 100) + " (#{(item.approve_credits).to_i} credits)" : "-"%>        
+        </tr>
+      </table>  
+      <br>
+    <%end%>
+    <%if params[:process]%>
+      <b>Process Request:</b>
+     <%= form_for(:f_process, url: url_for(:controller => 'admin', :action => @type, :page => @page, :show_all => @show_all)) do |form| %>
+      <table>
+        <tr>
+          <td align="right"><%= "Result: "%></td>
+          <td align="left"><%= form.select(:result, options_for_select(["APPROVED","DENIED"]), {}, {:style => "width:327px"})%></td>
+        </tr>        
+        <tr>
+          <td align="right"><%= "Credits: "%></td>
+          <td align="left"><%= form.number_field(:credits, :size => 50)%>&nbsp;<%="*RM1.00 = 100 credits*"%></td>
+        </tr>
+        <tr>
+          <td align="right"><%= "Comments: "%></td>
+          <td align="left"><%= form.text_area :comments ,:cols => 80, :rows => 6%></td>
+        </tr>          
+        <tr>
+          <td><%= form.hidden_field :id, :value => params[:process]%></td>
+          <td><%= form.submit 'Confirm'%></td>
+        </tr>  
+      </table>     
+    <%end%>      
+      <br>
+    <%end%>
+    
+  <hr style="border: 1px solid #888" />
+  <%if @list[0].empty?%>
+    <%= 'No results found.' %>
+  <%else%>
+    <% endpoint = [(@page - 1) * @result_limit + @result_limit, @count].min %>
+    <div style="float: left">
+      <%if !@show_all %>
+        <%= link_to "Show All Requests", {:controller => "admin", :action => @type, :page => @page, :show_all => true}%>
+      <%else%>  
+        <%= link_to "Show Pending Requests Only", {:controller => "admin", :action => @type, :page => @page, :show_all => false}%>
+      <%end%>  
+      <br>
+      <%= "Showing #{(@page - 1) * @result_limit + 1}~#{endpoint} out of #{@count} results." %>
+    </div>
+    <div style="float: right">
+      <%if @count > @result_limit%>
+        <div class="page_container">
+          <%if @page > 1%>
+            <div class="card_page"><%= link_to "<", {:controller => "admin", :action => @type, :page => @page - 1, :show_all => @show_all}%></div>
+          <%end%>
+          <%(@count.to_f / @result_limit).ceil.times do |i| %>
+            <%j = i + 1%>
+            <div class="card_page">
+              <%if j == @page%>
+                <b><%=j.to_s%></b>
+              <%else%>  
+                <%= link_to(j.to_s, {:controller => "admin", :action => @type, :page => j, :show_all => @show_all})%>
+              <%end%>  
+            </div>
+          <%end%>
+          <%if @count > endpoint%>
+            <div class="card_page"><%= link_to ">", {:controller => "admin", :action => @type, :page => @page + 1, :show_all => @show_all }%></div>
+          <%end%>
+        </div>
+      <%end%>
+    </div>
+  <div style="clear: both"></div>
+  <table class="vcode_table">
+    <tr>
+      <td style="width: 60px"><b>ID</b></td>
+      <td style="width: 160px"><b>User</b></td>
+      <td style="width: 260px"><b>Transaction ID</b></td>
+      <td style="width: 240px"><b>Request Date</b></td>
+      <td style="width: 80px"><b>Status</b></td>
+      <td style="width: 160px"><b>Operations</b></td>
+    </tr>
+    <%@list[0].each_with_index do |item, index|%>
+      <tr>
+        <td><%=item.id%></td>
+        <td><%="#{item.user_id} - #{User.find(item.user_id).name}"%></td>
+        <td><%=item.transaction_id%></td>
+        <td><%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+        <td><%=item.approved%></td>
+        <td>
+          <%if item.approved == "PENDING"%>
+            <%= link_to "Process", {:controller => "admin", :action => @type, :page => @page, :process => item.id, :show_all => @show_all }%>
+          <%else%>
+            <%= link_to "View", {:controller => "admin", :action => @type, :page => @page, :view => item.id, :show_all => @show_all }%>
+          <%end%>
+        </td>
+      </tr>
+    <%end%>
+  </table>  
+  <%end%>
+  <br>
+</div> 
+<br>
+<br>    
+  

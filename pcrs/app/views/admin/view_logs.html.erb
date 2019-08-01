@@ -1,0 +1,265 @@
+<%back if !admin_ip? || !admin?%>
+
+<div style="text-align: center; margin-top: 16px">
+	<%= link_to image_tag(image_path("main/admin_logo.png")), {controller: 'admin', action: 'index'}, style: "display: inline-block"%>
+</div>
+
+<div class="top_panel", style="position: relative">
+  <span style="font-size: 150%"><%="Welcome, #{current_admin.name}!"%></span>
+  <br>
+  <%="Server Time: #{Time.now.strftime("%Y-%m-%d %I:%M:%S %p ")}"%>
+  <div style="position: absolute; top: 20px; right: 16px">
+    <%=button_to "Log Out", url_for(:controller => 'admin', :action => 'logout'), :class => "main_button", :style => "background-color: rgba(0, 0, 208, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 150px">
+    <%=button_to "View Logs", url_for(:controller => 'admin', :action => 'view_logs'), :class => "main_button", :style => "background-color: rgba(123, 36, 28, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 284px">
+    <%=button_to "Manage Users", url_for(:controller => 'admin', :action => 'manage_users'), :class => "main_button", :style => "background-color: rgba(25, 111, 61, 1.0);"%>
+  </div>
+  <div style="position: absolute; top: 20px; right: 418px">
+    <%=button_to "Manage Reloads", url_for(:controller => 'admin', :action => 'manage_reloads'), :class => "main_button", :style => "background-color: rgba(74, 35, 90, 1.0);"%>
+  </div>       
+  <div style="position: absolute; top: 20px; right: 552px">
+    <%=button_to "Manage P. Codes", url_for(:controller => 'admin', :action => 'manage_prepaid_codes'), :class => "main_button", :style => "background-color: rgba(74, 74, 74, 1.0);"%>
+  </div>    
+  <div style="position: absolute; top: 20px; right: 686px">
+    <%=button_to "Manage P. Types", url_for(:controller => 'admin', :action => 'manage_prepaid_types'), :class => "main_button", :style => "background-color: rgba(74, 128, 96, 1.0);"%>
+  </div>   
+</div>
+
+<div class="main_panel">
+  <h2>
+  <%if @log_type == 1%>
+    <%= "View Purchase Logs"%>
+  <%elsif @log_type == 2%>
+    <%= "View User Logs"%>
+  <%elsif @log_type == 3%>
+    <%= "View Admin Logs"%>
+  <%else%>
+    <%= "View Logs"%>
+  <%end%>  
+  </h2>
+  <%if [1,2,3].include?(@log_type) %>
+    <%= link_to "Export XLS", {:controller => "admin", :action => @type, :log_type => @log_type, :day => @day,
+    :month => @month, :year => @year, :format => "xls"}%>
+  <%end%>
+  <%@type = "view_logs"%>
+  <hr style="border: 1px solid #888" />
+  
+  <%= link_to "Purchase Logs", {:controller => "admin", :action => @type, :log_type => 1}%> &nbsp;&nbsp;
+  <%= link_to "User Logs", {:controller => "admin", :action => @type, :log_type => 2}%> &nbsp;&nbsp;
+  <%= link_to "Admin Logs", {:controller => "admin", :action => @type, :log_type => 3}%> &nbsp;&nbsp;
+  <hr style="border: 1px solid #888" />
+  
+  <%if params[:view]%>
+    <br>
+    <%id = params[:view].to_i%>
+    <b><%="Showing Log ##{id}: "%></b><br>
+    <%if @log_type == 1%>
+      <%item = PrepaidPurchase.find(id)%>
+      <%item_c = PrepaidCode.find(item.prepaid_code_id)%>
+      <table>
+        <tr>
+          <td align="right"><%="Date: "%></td>
+          <td align="left">&emsp;<%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+        </tr>    
+        <tr>
+          <td align="right"><%="User: "%></td>
+          <td align="left">&emsp;<%="#{item.user_id} - #{User.find(item.user_id).name}"%></td>
+        </tr>      
+        <tr>
+          <td align="right"><%="Type: "%></td>
+          <td align="left">&emsp;<%=format_prepaid_type_string(item_c.prepaid_type_id)%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Code: "%></td>
+          <td align="left">&emsp;<%=item_c.code%></td>
+        </tr>        
+        <tr>
+          <td align="right"><%="PIN: "%></td>
+          <td align="left">&emsp;<%=(item_c.pin && !item_c.pin.empty?) ? item_c.pin : "-" %></td>          
+        </tr>
+        <tr>
+          <td align="right"><%="Purchase Price: "%></td>
+          <td alight="left">&emsp;<%=sprintf("RM %.02f", item.purchase_price) + " (#{(item.purchase_price * 100).to_i} credits)"%>        
+        </tr>
+      </table>
+    <%elsif @log_type == 2%>
+      <%item = UserLog.find(id)%>
+      <table>
+        <tr>
+          <td align="right"><%="Date: "%></td>
+          <td align="left">&emsp;<%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+        </tr>    
+        <tr>
+          <td align="right"><%="User: "%></td>
+          <td align="left">&emsp;<%="#{item.user_id} - #{User.find(item.user_id).name}"%></td>
+        </tr>      
+        <tr>
+          <td align="right"><%="IP Address: "%></td>
+          <td align="left">&emsp;<%=item.ip%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Action Name: "%></td>
+          <td align="left">&emsp;<%=item.action_name%></td>
+        </tr>        
+        <tr>
+          <td align="right"><%="Action Details: "%></td>
+          <td align="left">&emsp;<%=item.action_details%></td>          
+        </tr>
+      </table>    
+    <%elsif @log_type == 3%>
+      <%item = AdminLog.find(id)%>
+      <table>
+        <tr>
+          <td align="right"><%="Date: "%></td>
+          <td align="left">&emsp;<%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+        </tr>    
+        <tr>
+          <td align="right"><%="Admin: "%></td>
+          <td align="left">&emsp;<%="#{item.admin_id} - #{Admin.find(item.admin_id).name}"%></td>
+        </tr>      
+        <tr>
+          <td align="right"><%="IP Address: "%></td>
+          <td align="left">&emsp;<%=item.ip%></td>
+        </tr>
+        <tr>
+          <td align="right"><%="Action Name: "%></td>
+          <td align="left">&emsp;<%=item.action_name%></td>
+        </tr>        
+        <tr>
+          <td align="right"><%="Action Details: "%></td>
+          <td align="left">&emsp;<%=item.action_details%></td>          
+        </tr>
+      </table>         
+    <%end%>
+    <br>
+    <hr style="border: 1px solid #888" />
+  <%end%>
+  
+  <%if @log_type == 0%>
+    <%="Please select a log type."%><br>
+  <%else%>
+    <%= form_for(:f_filter, url: url_for(:controller => 'admin', :action => @type, :page => @page, :log_type => @log_type)) do |form| %>
+      <%year = ["-"] + (2017..2050).to_a %>
+      <%month = ["-"] + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] %>
+      <%day = ["-"] + (1..31).to_a %>
+      <%= form.select(:day, options_for_select(day, :selected => @day), {}, {:style => "width:80px"})%>
+      <%= form.select(:month, options_for_select(month, :selected => @month), {}, {:style => "width:80px"})%>
+      <%= form.select(:year, options_for_select(year, :selected => @year), {}, {:style => "width:80px"})%>
+      <%= form.submit 'Filter'%>
+    <%end%>
+    <%if @list[0].empty?%>
+      <%= 'No results found.' %>
+    <%else%>
+      <% endpoint = [(@page - 1) * @result_limit + @result_limit, @count].min %>
+        <div style="float: left"> 
+          <br>
+          <%= "Showing #{(@page - 1) * @result_limit + 1}~#{endpoint} out of #{@count} results." %>
+        </div>
+        <div style="float: right">
+          <%if @count > @result_limit%>
+            <div class="page_container">
+              <%if @page > 1%>
+                <div class="card_page"><%= link_to "<", {:controller => "admin", :action => @type, :page => @page - 1, :log_type => @log_type}%></div>
+              <%end%>
+              <%(@count.to_f / @result_limit).ceil.times do |i| %>
+                <%j = i + 1%>
+                <div class="card_page">
+                  <%if j == @page%>
+                    <b><%=j.to_s%></b>
+                  <%else%>  
+                    <%= link_to(j.to_s, {:controller => "admin", :action => @type, :page => j, :log_type => @log_type })%>
+                  <%end%>  
+                </div>
+              <%end%>
+              <%if @count > endpoint%>
+                <div class="card_page"><%= link_to ">", {:controller => "admin", :action => @type, :page => @page + 1, :log_type => @log_type }%></div>
+              <%end%>
+            </div>
+          <%end%>
+        </div>
+      <div style="clear: both"></div>    
+      <%if @log_type == 1%> 
+        <%str = sprintf("RM %.2f", @total_sales)%>
+        <%="Total Sales: #{str}"%><br>
+        <table class="vcode_table">
+          <tr>
+            <td style="width: 60px"><b>ID</b></td>
+            <td style="width: 260px"><b>Date</b></td>
+            <td style="width: 160px"><b>User</b></td>
+            <td><b>Type</b></td>
+            <td style="width: 260px"><b>Price</b></td>
+            <td style="width: 160px"><b>Operations</b></td>
+          </tr>
+          <%@list[0].each_with_index do |item, index|%>
+            <tr>
+              <td><%=item.id%></td>
+              <td><%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+              <td><%="#{item.user_id} - #{User.find(item.user_id).name}"%></td>
+              <td><%=format_prepaid_type_string(PrepaidCode.find(item.prepaid_code_id).prepaid_type_id)%></td>
+              <td><%=sprintf("RM %.02f", item.purchase_price) + " (#{(item.purchase_price * 100).to_i} credits)"%></td>
+              <td>
+                <%= link_to "View", {:controller => "admin", :action => @type, :page => @page, :log_type => @log_type, :view => item.id}%>
+              </td>
+            </tr>
+          <%end%>
+        </table>
+      <%elsif @log_type == 2%>
+         <table class="vcode_table">
+          <tr>
+            <td style="width: 60px"><b>ID</b></td>
+            <td style="width: 260px"><b>Date</b></td>
+            <td style="width: 160px"><b>User</b></td>
+            <td style="width: 120px"><b>IP Address</b></td>
+            <td style="width: 200px"><b>Action Name</b></td>
+            <td><b>Action Details</b></td>
+            <td style="width: 80px"><b>Operations</b></td>
+          </tr>
+          <%@list[0].each_with_index do |item, index|%>
+            <tr>
+              <td><%=item.id%></td>
+              <td><%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+              <td><%="#{item.user_id} - #{User.find(item.user_id).name}"%></td>
+              <td><%=item.ip%></td>
+              <td><%=trim(item.action_name, 24)%></td>
+              <td><%=trim(item.action_details, 36)%></td>
+              <td>
+                <%= link_to "View", {:controller => "admin", :action => @type, :page => @page, :log_type => @log_type, :view => item.id}%>
+              </td>
+            </tr>
+          <%end%>
+        </table>   
+      <%elsif @log_type == 3%>
+         <table class="vcode_table">
+          <tr>
+            <td style="width: 60px"><b>ID</b></td>
+            <td style="width: 260px"><b>Date</b></td>
+            <td style="width: 160px"><b>Admin</b></td>
+            <td style="width: 120px"><b>IP Address</b></td>
+            <td style="width: 200px"><b>Action Name</b></td>
+            <td><b>Action Details</b></td>
+            <td style="width: 80px"><b>Operations</b></td>
+          </tr>
+          <%@list[0].each_with_index do |item, index|%>
+            <tr>
+              <td><%=item.id%></td>
+              <td><%=item.created_at.strftime("%Y-%m-%d %I:%M:%S %p ")%></td>
+              <td><%="#{item.admin_id} - #{Admin.find(item.admin_id).name}"%></td>
+              <td><%=item.ip%></td>
+              <td><%=trim(item.action_name, 24)%></td>
+              <td><%=trim(item.action_details, 36)%></td>
+              <td>
+                <%= link_to "View", {:controller => "admin", :action => @type, :page => @page, :log_type => @log_type, :view => item.id}%>
+              </td>
+            </tr>
+          <%end%>
+        </table>       
+      <%end%>
+    <%end%>  
+  <%end%>  
+  <br>
+</div>
+<br>
+<br>

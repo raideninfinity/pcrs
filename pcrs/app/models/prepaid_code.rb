@@ -1,0 +1,2 @@
+class PrepaidCode < ApplicationRecord
+end
